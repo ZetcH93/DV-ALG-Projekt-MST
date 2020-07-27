@@ -1,14 +1,10 @@
-V1
-V4
-V2
-V3
-V6
-V7
-V5
+d
+e
+c
+a
+b
 
-V1	V4	1
-V6	V7	1
-V1	V2	2
-V3	V4	2
-V4	V7	4
-V5	V7	6
+d	e	1
+e	c	2
+d	a	3
+b	c	4

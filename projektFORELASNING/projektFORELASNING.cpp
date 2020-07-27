@@ -90,8 +90,8 @@ void ReadValuesFromFile(const string& filepath, vector<rail>& rails, vector<stat
 void WriteValuesToFile(vector<rail>& mstRail, vector<stationNode>& stations)  //write the mst to "mstRail.txt"
 {
 	ofstream file("Awnser.txt");
-	string tab = "	";
-
+	char tab = '\t';
+	
 	for (unsigned int i = 0; i < (stations.size()); i++)	// skriver ut stationerna som användes i MST
 		if (stations.at(i).stationTreeSize() > 1)
 			stations[i].getStationArrayFile(file);
