@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <chrono>
 #include "nodeClass.h"
 
 using namespace std;
@@ -59,7 +60,7 @@ void ReadValuesFromFile(const string& filepath, vector<rail>& rails, vector<stat
 					cost += input[i];		// cost i getlinen
 					i++;
 				}
-				
+
 
 			}
 			else
@@ -87,11 +88,11 @@ void ReadValuesFromFile(const string& filepath, vector<rail>& rails, vector<stat
 
 
 
-void WriteValuesToFile(vector<rail>& mstRail, vector<stationNode>& stations)  //write the mst to "mstRail.txt"
+void WriteValuesToFile(vector<rail>& mstRail, vector<stationNode>& stations)
 {
 	ofstream file("Awnser.txt");
 	char tab = '\t';
-	
+
 	for (unsigned int i = 0; i < (stations.size()); i++)	// skriver ut stationerna som användes i MST
 		if (stations.at(i).stationTreeSize() > 1)
 			stations[i].getStationArrayFile(file);
@@ -107,53 +108,30 @@ void WriteValuesToFile(vector<rail>& mstRail, vector<stationNode>& stations)  //
 //kruskal algorithm
 vector<rail> kruskal(vector<rail>& railroads, vector<stationNode>& stations)
 {
-	priority_queue pq{ railroads };		//skapar en prioritets kö och matar in länkarna/edges
-	vector<rail> mst;	// en tom mst som kommer fyllas med de mest optimala länkarna för givna stationer
-	int stationAmount = (stations.size() - 1);
+	int stationSize = stations.size();
+	priority_queue pq{ railroads };
+	vector<rail> mst;
 
+	while (mst.size() != stationSize - 1)
+	{	
+		int station1 = NULL;
+		int station2 = NULL;
+		rail rail = pq.pop(); 
 
-
-	while (mst.size() != stationAmount)	//kör tills dess att mst trädet har lika många noder som antalet stationer
-	{
-		rail railBetweenStations = pq.pop(); //pops out the cheapest value from the minHeap priority queue
-
-
-		for (unsigned int i = 0; i < stations.size(); i++)		// för varje station...
+		for (int i = 0; i < stations.size(); i++)
 		{
-			if (stations.at(i).find(railBetweenStations.getNode1()) == railBetweenStations.getNode1())	// om stationens vektor innehåller första noden i den ena länken
-				if (stations.at(i).find(railBetweenStations.getNode2()) == railBetweenStations.getNode2())	//checks for cycles, genom att kolla om första stationen innehåller båda noderna redan
-				{
-					break;
-				}
-				else
-				{
-					mst.push_back(railBetweenStations);	// lägger till länken i mst trädet
-
-					for (unsigned int x = 0; x < stations.size(); x++)		
-					{
-						if (stations.at(x).find(railBetweenStations.getNode2()) == railBetweenStations.getNode2()) //looks for the station containing the node2 in the edge/länken
-							if (stations.at(i).stationTreeSize() >= stations.at(x).stationTreeSize())	// lägger till den mindre stationsvektorn i den större
-							{
-								stations.at(i).unionStations(stations.at(x).getStationArray());	// adds together the two station amounts into one
-								stations.at(x).delStation();	// sätter den gamla vektorn till 0 (då värdet av dess element nu tillhör den andra stations mängden)
-
-								break;
-
-							}
-							else
-							{
-								stations.at(x).unionStations(stations.at(i).getStationArray()); // adds together the two station amounts into one
-								stations.at(i).delStation();	// sätter den gamla vektorn till 0 (då värdet av dess element nu tillhör den andra stations mängden)
-
-								break;
-
-							}
-					}
-
-					break;
-				}
+			if (stations[i].find(rail.getNode1()))
+				station1 = i;
+			if (stations[i].find(rail.getNode2()))
+				station2 = i;
+			if ((station1 != NULL) && (station2 != NULL))
+				break;
 		}
-
+		if (station1 != station2)
+		{
+			mst.push_back(rail);
+			stations[station1].unionStations(station1, station2, stations);
+		}
 	}
 	return mst;
 }
@@ -161,6 +139,7 @@ vector<rail> kruskal(vector<rail>& railroads, vector<stationNode>& stations)
 
 int main(long int argc, char** argv)
 {
+	auto start = std::chrono::steady_clock::now();
 	vector<rail> rails;		// vektorarray som innehåller "edges/länkar"
 	vector<stationNode> stations;	// en vektor som innehåller stationsNoder som fungerar som disjunta mängder
 	vector<rail> mstRail;	// en vektor som innehåller de länkar som finns i minimal spanning tree (ett cykliskt viktat träd utan riktning)
@@ -171,6 +150,9 @@ int main(long int argc, char** argv)
 
 	WriteValuesToFile(mstRail, stations);	// läser ut datan från mst samt de aktuella stationer som är kvar till en textfil.
 
+	auto end = chrono::steady_clock::now();
+	chrono::duration<double> elapsed_seconds = end - start;
+	cout << "Sorting took: " << elapsed_seconds.count() << " seconds" << std::endl;
 
 }
 

@@ -4,43 +4,65 @@
 stationNode::stationNode(string stationName)
 {
 	this->stationTree.push_back(stationName);		//lägger till värde i vektorn när stationen skapas
+	this->root = -1;
 
 }
 
 
-
-string stationNode::find(string x)	// letar i vektorns array(mängd) om den innehåller station x
+bool stationNode::find(string x)	// letar i vektorns array(mängd) om den innehåller station x
 {
-	string value = "";
+	bool value = false;
 
 	for (unsigned int i = 0; i < stationTree.size(); i++)
 	{
 		if (stationTree[i] == x)
-			value = x;
+		{
+			value = true;
+			break;
+		}
 	}
-
 	return value;
 }
 
-void stationNode::unionStations(vector<string> stationpqArray)	//lägger till alla värden från den mindre vektorn till den nya vektorn(mängd)
-{
-	for (unsigned int i = 0; i < stationpqArray.size(); i++)
+void stationNode::unionStations(int station1, int station2, vector<stationNode>& stations)	//lägger till alla värden från den mindre vektorn till den nya vektorn(mängd)
+{	
+	if (stations[station1].stationTreeSize() >= stations[station2].stationTreeSize())
 	{
-		this->stationTree.push_back(stationpqArray.at(i));
+		stations[station2].setRoot(station1); //sätter station2 root till station1 root
+		stations[station1].addtoTree(stations[station2].getStationArray());
+	}
+	else
+	{
+		stations[station1].setRoot(station2); //sätter station2 root till station1 root
+		stations[station2].addtoTree(stations[station1].getStationArray());
+	}
+		
+}
+
+void stationNode::addtoTree(vector<string> station2Tree)
+{
+	for (int i = 0; i < station2Tree.size(); i++)
+	{
+		stationTree.push_back(station2Tree[i]);
 	}
 }
 
+int stationNode::getRoot()
+{
+	return this->root;
+}
 
+void stationNode::setRoot(int root)
+{
+	this->root = root;
+}
 
 int stationNode::stationTreeSize() //skriver ut vektorns storlek
 {
 	return this->stationTree.size();
 }
 
-void stationNode::delStation()	// "tar bort" vektorn genom att sätta den till 0
-{
-	stationTree.resize(0);
-}
+
 
 void stationNode::getStationArrayFile(ofstream& file)	//skriver ut hela mängden för de aktuella stationer i mst
 {
@@ -53,7 +75,9 @@ void stationNode::getStationArrayFile(ofstream& file)	//skriver ut hela mängden 
 
 vector<string> stationNode::getStationArray()	// returnar hela vektorn som finns i detta objektet
 {
-	return this->stationTree;
+	vector<string> temp = this->stationTree;
+	this->stationTree.clear();
+	return temp;
 }
 
 
@@ -120,7 +144,7 @@ priority_queue::priority_queue(vector<rail>& rails)	// pq konstruktor som tar em
 
 }
 
-rail priority_queue::pop()	
+rail priority_queue::pop()
 {
 	rail returnValue = pqArray[0];	//plockar ut det översta värdet i pqarrayen och lägger denna i returnvalue
 
@@ -128,8 +152,8 @@ rail priority_queue::pop()
 
 	pqArray[0] = move(pqArray[lastIndex]);	// flyttar värdet som är längst ner i arrayen överst i kön
 	pqArray.resize(lastIndex);	// gör kön 1 steg mindre(då ett värde har tagits ut)
-	
-	if(lastIndex != 0) //om det är fler än ett värde i kön:
+
+	if (lastIndex != 0) //om det är fler än ett värde i kön:
 		percolateDown(0); //balansera kön (heapen) i storleksordning efter pop
 
 	return returnValue;

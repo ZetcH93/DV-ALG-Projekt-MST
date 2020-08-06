@@ -9,29 +9,32 @@ using namespace std;
 
 
 
-
 class stationNode		// en disjointed mängd (träd nod(station))
 {
 
 private:
 	vector<string> stationTree; // vector which may contain an amount of other stations
+	int root;
 
 public:
 	stationNode(string stationName);
+	
 
-	string find(string x);		// letar upp om stationens mängd innehåller en vis station av värde x
-	void unionStations(vector<string> stationArray); //lägger ihop en annan stationsmängd med denna
+	bool find(string x);		// letar upp om stationens mängd innehåller en vis station av värde x
+	void unionStations(int station1Root, int station2Root, vector<stationNode>& stations); //lägger ihop en annan stationsmängd med denna
 
 	int stationTreeSize();	//skriver ut storleken av trädet
-	void delStation();  //sätter storleken av trädet till 0
 	vector<string> getStationArray(); // returnar arrayen
+	int getRoot();
+	void setRoot(int root);
+	void addtoTree(vector<string> station2Tree);
 
 	void getStationArrayFile(ofstream& file); //skriver ut stationsarrayen till en fil
 
 
-
-
 };
+
+
 
 class rail	//en länk/railroad mellan två stationer med en kostnad
 {
